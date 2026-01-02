@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✨ Sony Digital Paper Manager ✨</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>📱 Sony Digital Paper Manager</h1>
+            <div class="header-actions">
+                <button id="connectBtn" class="btn btn-primary">🔌 Connect to Device</button>
+                <div id="deviceInfo" class="device-info hidden">
+                    <span class="battery">🔋 <span id="batteryLevel">--</span>%</span>
+                    <span class="storage">💾 <span id="storageUsed">--</span> / <span id="storageTotal">--</span></span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Status Bar -->
+        <div id="statusBar" class="status-bar hidden">
+            <span id="statusMessage"></span>
+        </div>
+
+        <!-- Progress Bar -->
+        <div id="progressContainer" class="progress-container hidden">
+            <div class="progress-info">
+                <span id="progressLabel">Syncing...</span>
+                <span id="progressPercent">0%</span>
+            </div>
+            <div class="progress-bar">
+                <div id="progressFill" class="progress-fill"></div>
+            </div>
+            <div id="progressDetail" class="progress-detail"></div>
+        </div>
+
+        <!-- Main Content - Split Pane -->
+        <div class="split-pane">
+            <!-- Local Files Panel -->
+            <div class="panel local-panel">
+                <div class="panel-header">
+                    <h2>💻 Local Files</h2>
+                    <div class="breadcrumb">
+                        <span id="localPath">~</span>
+                    </div>
+                </div>
+
+                <div class="toolbar">
+                    <button id="localSelectAllBtn" class="btn btn-sm">☑️ Select All</button>
+                    <button id="localUpBtn" class="btn btn-sm">⬆️ Up</button>
+                    <button id="localRefreshBtn" class="btn btn-sm">🔄 Refresh</button>
+                    <button id="uploadBtn" class="btn btn-success btn-sm" disabled>📤 Upload to Device</button>
+                </div>
+
+                <div class="file-list" id="localFileList">
+                    <div class="loading">Loading...</div>
+                </div>
+            </div>
+
+            <!-- Sync Center Panel -->
+            <div class="sync-panel">
+                <button id="backupBtn" class="btn btn-sync-sm" disabled title="Download all from device to local">
+                    <span>📥</span>
+                    <span>BACKUP</span>
+                </button>
+                <button id="uploadAllBtn" class="btn btn-sync-sm" disabled title="Upload all from local to device">
+                    <span>📤</span>
+                    <span>UPLOAD</span>
+                </button>
+                <button id="syncToBtn" class="btn btn-sync-sm btn-danger-sync" disabled
+                    title="Sync: local → device (deletes from device!)">
+                    <span>🔄</span>
+                    <span>SYNC</span>
+                </button>
+                <p class="sync-hint">Backup: device→local<br>Upload: local→device<br>Sync: mirror local (⚠️ deletes!)
+                </p>
+            </div>
+
+            <!-- Device Files Panel -->
+            <div class="panel device-panel">
+                <div class="panel-header">
+                    <h2>📄 Device Files</h2>
+                    <div class="breadcrumb">
+                        <span id="devicePath">Document</span>
+                    </div>
+                </div>
+
+                <div class="toolbar">
+                    <button id="deviceSelectAllBtn" class="btn btn-sm" disabled>☑️ Select All</button>
+                    <button id="deviceUpBtn" class="btn btn-sm" disabled>⬆️ Up</button>
+                    <button id="deviceRefreshBtn" class="btn btn-sm" disabled>🔄 Refresh</button>
+                    <button id="newFolderBtn" class="btn btn-sm" disabled>📁 New Folder</button>
+                    <button id="downloadBtn" class="btn btn-success btn-sm" disabled>📥 Download</button>
+                    <button id="deleteBtn" class="btn btn-danger btn-sm" disabled>🗑️ Delete</button>
+                </div>
+
+                <div class="file-list" id="deviceFileList">
+                    <div class="placeholder">
+                        <p>🔌 Connect to your device to see files</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for New Folder -->
+    <div id="newFolderModal" class="modal hidden">
+        <div class="modal-content">
+            <h3>📁 Create New Folder</h3>
+            <input type="text" id="folderNameInput" placeholder="Folder name">
+            <div class="modal-actions">
+                <button id="createFolderBtn" class="btn btn-primary">Create</button>
+                <button id="cancelFolderBtn" class="btn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Delete Confirmation -->
+    <div id="deleteModal" class="modal hidden">
+        <div class="modal-content">
+            <h3>🗑️ Confirm Delete</h3>
+            <p>Are you sure you want to delete <span id="deleteCount">0</span> item(s)?</p>
+            <p class="warning">⚠️ This action cannot be undone!</p>
+            <div class="modal-actions">
+                <button id="confirmDeleteBtn" class="btn btn-danger">Delete</button>
+                <button id="cancelDeleteBtn" class="btn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+
+</html>

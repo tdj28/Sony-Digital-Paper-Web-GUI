@@ -1,0 +1,28 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+venv/
+
+# UV lock file (optional - keep if you want reproducible builds)
+# uv.lock
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS files
+.DS_Store
+
+# Old pip requirements (using pyproject.toml now)
+requirements.txt
+
+# Reference repo (included for API reference only)
+dpt-rp1-py/
