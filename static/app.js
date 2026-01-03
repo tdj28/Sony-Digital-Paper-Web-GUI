@@ -577,12 +577,33 @@ function updateProgress(percent, detail = '') {
 function hideProgress() {
     progressContainer.classList.add('hidden');
 }
+// Helper: Get target local folder (selected folder if one is checked, otherwise current path)
+function getTargetLocalFolder() {
+    // Check if exactly one folder is selected on local side
+    const selectedPaths = Array.from(selectedLocalFiles);
 
-// Backup: Download All from Device (skips existing)
+    if (selectedPaths.length === 1) {
+        // Check if it's a folder (folders have paths ending without extension or we check the element)
+        const fileItem = localFileList.querySelector(`.file-item[data-path="${CSS.escape(selectedPaths[0])}"]`);
+        if (fileItem && fileItem.classList.contains('folder')) {
+            return selectedPaths[0];
+        }
+    }
+
+    // Default to current path
+    return currentLocalPath;
+}
+
+// Backup: Download All from Device (skips existing) - NEVER deletes local files
 async function backupFromDevice() {
     if (!deviceConnected) return;
 
-    const localFolder = currentLocalPath;
+    const localFolder = getTargetLocalFolder();
+
+    // Confirmation with folder path
+    if (!confirm(`📥 BACKUP will download ALL files from device to:\n\n${localFolder}\n\n• Existing local files will be SKIPPED (not overwritten)\n• This NEVER deletes any local files\n\nProceed?`)) {
+        return;
+    }
 
     backupBtn.classList.add('syncing');
     backupBtn.disabled = true;
@@ -621,11 +642,16 @@ async function backupFromDevice() {
     }
 }
 
-// Upload All: Upload from Local to Device (skips existing)
+// Upload All: Upload from Local to Device (skips existing) - NEVER deletes anything
 async function uploadAllToDevice() {
     if (!deviceConnected) return;
 
-    const localFolder = currentLocalPath;
+    const localFolder = getTargetLocalFolder();
+
+    // Confirmation with folder path
+    if (!confirm(`📤 UPLOAD will upload all PDFs from:\n\n${localFolder}\n\n• Files already on device will be SKIPPED\n• This NEVER deletes any files (local or device)\n\nProceed?`)) {
+        return;
+    }
 
     uploadAllBtn.classList.add('syncing');
     uploadAllBtn.disabled = true;
@@ -664,16 +690,24 @@ async function uploadAllToDevice() {
     }
 }
 
-// Sync To Device: Make device mirror local (uploads new, DELETES from device!)
+// Sync To Device: Make device mirror local (uploads new, DELETES from DEVICE only!)
 async function syncToDevice() {
     if (!deviceConnected) return;
 
-    // Confirm because this deletes files!
-    if (!confirm('⚠️ SYNC will:\n• Upload files from local to device\n• DELETE files from device that are not in local folder\n\nAre you sure?')) {
-        return;
-    }
+    const localFolder = getTargetLocalFolder();
 
-    const localFolder = currentLocalPath;
+    // Strong warning confirmation with folder path
+    const confirmed = confirm(
+        `⚠️ SYNC TO DEVICE\n\n` +
+        `Source folder:\n${localFolder}\n\n` +
+        `This will:\n` +
+        `✅ Upload files from local to device\n` +
+        `🗑️ DELETE files from DEVICE that are not in local folder\n\n` +
+        `⚠️ This NEVER deletes local files - only device files!\n\n` +
+        `Are you sure you want to make the device mirror this folder?`
+    );
+
+    if (!confirmed) return;
 
     syncToBtn.classList.add('syncing');
     syncToBtn.disabled = true;
@@ -697,7 +731,7 @@ async function syncToDevice() {
         const data = await response.json();
 
         if (data.success) {
-            updateProgress(100, `Uploaded ${data.uploaded}, deleted ${data.deleted}`);
+            updateProgress(100, `Uploaded ${data.uploaded}, deleted ${data.deleted} from device`);
             showStatus(data.message, 'success');
             await loadDeviceFiles(currentDevicePath);
         } else {
@@ -711,3 +745,4 @@ async function syncToDevice() {
         setTimeout(hideProgress, 3000);
     }
 }
+
